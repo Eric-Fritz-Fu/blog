@@ -10,10 +10,11 @@ struct shape {
 };
 
 shape* shape_new(void);
-shape* shape_new(int x, int y);
+shape* shape_init(int x, int y);
+void shape_delete(shape* self);
+void shape_print(shape* self);
 
-int shape_moveBy(int x, int y);
-int shape_moveTo(int x, int y);
-void shape_print(void);
+void shape_moveBy(shape* self, int x, int y);
+void shape_moveTo(shape* self, int x, int y);
 
 #endif

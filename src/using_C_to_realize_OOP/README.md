@@ -23,7 +23,9 @@
 在下面的例子里，我们定义了 `x` 和 `y` 两个字段，分别表示形状位置的横、纵坐标。
 
 方法函数的第一个参数在使用时手动传入，相当于方法中 `this` 的值。
-这里我们定义了 `mvoeTo`，`moveBy`，`print` 三个个方法。
+这里我们定义了 `new`，`init`，`delete`，`print`，`mvoeTo`，`moveBy` 六个方法。
+其中 `init` 和 `new` 方法是静态方法。
+`init` 方法调用 `new` 方法来建立对象，然后再初始化。
 我通常使用 `类名_方法名` 的形式来命名方法，你也可以使用你自己喜欢的命名方式。
 
 所以，头文件应该长这样：
@@ -41,11 +43,33 @@ struct shape {
 };
 
 shape* shape_new(void);
-shape* shape_new(int x, int y);
+shape* shape_init(int x, int y);
+void shape_delete(shape* self);
+void shape_print(shape* self);
 
-int shape_moveBy(int x, int y);
-int shape_moveTo(int x, int y);
-void shape_print(void);
+void shape_moveBy(shape* self, int x, int y);
+void shape_moveTo(shape* self, int x, int y);
 
 #endif
 ```
+
+实现请移步：[shape 类源码链接](./src/shape.c)
+
+客户端代码：
+
+```c
+shape* test = shape_init(5, 5);  // 建立对象
+shape_print(test);               // 打印出 shape(x=5, y=5)
+shape_moveBy(test, 1, -2);       // 向右移动 1，向下移动 2
+shape_print(test);               // 打印出 shape(x=6, y=3)
+shape_moveTo(test, 2, 2);        // 移到 x=2, y=2 的位置
+shape_print(test);               // 打印出 shape(x=2, y=2)
+shape_delete(test);              // 删除/释放对象
+```
+
+### 继承
+
+此时的 `shape` 并没有什么实际意义，让我们来实现一个正方形。
+正方形是图形的一种，自然我们就想到了面向对象中的继承。
+
+这里我先给出源码，看看你能不能自己想明白为什么。
