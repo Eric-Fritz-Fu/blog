@@ -18,17 +18,6 @@
 封装就是把数据和方法封装到一起。
 很容易想到，我们可以使用结构体表示对象，用函数来表示方法。
 
-每个结构体有用多个字段，代表了对象的属性。
-在下面的例子里，我们定义了 `x` 和 `y` 两个字段，分别表示形状位置的横、纵坐标。
-
-方法函数的第一个参数在使用时手动传入，相当于方法中 `this` 的值。
-这里我们定义了 `new`，`init`，`delete`，`print`，`mvoeTo`，`moveBy` 六个方法。
-其中 `init` 和 `new` 方法是静态方法。
-`init` 方法调用 `new` 方法来建立对象，然后再初始化。
-我通常使用 `类名_方法名` 的形式来命名方法，你也可以使用你自己喜欢的命名方式。
-
-所以，头文件应该长这样：
-
 ```c
 // shape.h
 
@@ -52,7 +41,16 @@ void shape_moveTo(shape* self, int x, int y);
 #endif
 ```
 
-实现请移步：[shape 类源码链接](./src/shape.c)
+每个结构体有用多个字段，代表了对象的属性。
+在上面的例子里，我们定义了 `x` 和 `y` 两个字段，分别表示形状位置的横、纵坐标。
+
+普通方法的第一个参数 `self` 在使用时手动传入，表示调用的对象，相当于大多数语言中 `this` 的值。
+我们定义了 `new`，`init`，`delete`，`print`，`mvoeTo`，`moveBy` 六个方法。
+其中 `init` 和 `new` 方法是静态方法。
+`init` 方法调用 `new` 方法来建立对象，然后再初始化。
+我通常使用 `类名_方法名` 的形式来命名方法，你也可以使用你自己喜欢的命名方式。
+
+具体实现请移步：[shape 类源码链接](./src/shape.c)
 
 客户端代码：
 
@@ -68,7 +66,33 @@ shape_delete(test);              // 删除/释放对象
 
 ### 继承
 
-此时的 `shape` 并没有什么实际意义，让我们来实现一个正方形。
+此时的 `shape` 并没有什么实际作用，下面让我们来实现一个名为 `square` 的类来表示一个正方形。
 正方形是图形的一种，自然我们就想到了面向对象中的继承。
 
-这里我先给出源码，看看你能不能自己想明白为什么。
+我们可以使用组合来代替继承，并使用指针寻址来实现和继承一样的效果。
+
+```c
+// square.h
+
+#ifndef square_H_
+#define square_H_
+
+#include "shape.h"
+
+typedef struct square square;
+struct square {
+    shape super;
+    int length;
+};
+
+square* square_new(void);
+square* square_init(int x, int y);
+void square_delete(shape* self);
+void square_print(shape* self);
+
+#endif
+```
+
+如果你对 C 语言有一些研究，你应该知道上面的结构体 `square` 在内存中是这样的：
+
+![内存示意图](./statics/pic01.jpg)
