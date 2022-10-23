@@ -7,8 +7,8 @@ shape* shape_new(void) {
     return self;
 }
 
-shape* shape_init(int x, int y) {
-    shape* self = shape_new();
+shape* shape_init(shape* self, int x, int y) {
+    self->print = &shape_print;
     self->x = x;
     self->y = y;
     return self;
@@ -30,4 +30,8 @@ void shape_moveTo(shape* self, int x, int y) {
 
 void shape_print(shape* self) {
     printf("shape(x=%d, y=%d)\n", self->x, self->y);
+}
+
+void shape_adprint(shape* self) {
+    self->print(self);
 }

@@ -12,7 +12,7 @@ struct square {
 };
 
 square* square_new(void);
-square* square_init(int x, int y, int length);
+square* square_init(square* self, int x, int y, int length);
 void square_delete(square* self);
 void square_print(square* self);
 

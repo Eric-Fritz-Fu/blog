@@ -46,7 +46,7 @@ void shape_moveTo(shape* self, int x, int y);
 
 普通方法的第一个参数 `self` 在使用时手动传入，表示调用的对象，相当于大多数语言中 `this` 的值。
 我们定义了 `new`，`init`，`delete`，`print`，`mvoeTo`，`moveBy` 六个方法。
-其中 `init` 和 `new` 方法是静态方法。
+其中 `new` 方法是静态方法，没有 `self` 参数。
 `init` 方法调用 `new` 方法来建立对象，然后再初始化。
 我通常使用 `类名_方法名` 的形式来命名方法，你也可以使用你自己喜欢的命名方式。
 
@@ -55,13 +55,14 @@ void shape_moveTo(shape* self, int x, int y);
 客户端代码：
 
 ```c
-shape* test = shape_init(5, 5);  // 建立对象
-shape_print(test);               // 打印出 shape(x=5, y=5)
-shape_moveBy(test, 1, -2);       // 向右移动 1，向下移动 2
-shape_print(test);               // 打印出 shape(x=6, y=3)
-shape_moveTo(test, 2, 2);        // 移到 x=2, y=2 的位置
-shape_print(test);               // 打印出 shape(x=2, y=2)
-shape_delete(test);              // 删除/释放对象
+shape* test = shape_new();  // 建立 shape 对象
+shape_init(test, 5, 5);     // 初始化对象
+shape_print(test);          // 打印出 shape(x=5, y=5)
+shape_moveBy(test, 1, -2);  // 向右移动 1，向下移动 2
+shape_print(test);          // 打印出 shape(x=6, y=3)
+shape_moveTo(test, 2, 2);   // 移到 x=2, y=2 的位置
+shape_print(test);          // 打印出 shape(x=2, y=2)
+shape_delete(test);         // 删除/释放对象
 ```
 
 ### 继承
@@ -93,10 +94,66 @@ void square_print(shape* self);
 #endif
 ```
 
+客户端代码：
+
+```c
+square* test = square_new();        // 建立 square 对象
+square_init(test, 5, 5, 10);        // s初始化对象
+shape_print((shape*)test);          // 打印出 shape(x=5, y=5)
+square_print(test);                 // 打印出 square(x=5, y=5, length=10)
+shape_moveBy((shape*)test, 2, -3);  // 向右移动 2，向下移动 3
+square_print(test);                 // 打印出 square(x=7, y=2, length=10)
+square_delete(test);
+```
+
 如果你对 C 语言有一些研究，你应该知道上面的结构体 `square` 在内存中是这样的：
 
-![内存示意图](./statics/pic01.jpg)
+![内存示意图](./statics/pic01.svg)
 
-每个结构体中属性存储的顺序，都是直接按照代码中的顺序编排的。
-寻址时，使用结构体的地址加上编译时求出的偏移值，得到字段的地址。
-因此，当你把 `square` 指针当做 `shape` 传入 `shape` 的方法时，该方法在对属性寻址时可以在找到在头部的 `shape` 对象中的字段，这样就实现了调用父类方法的功能。
+由图可得，把 `square *` 当作 `shape *` 访问其中的字段时，就相当于访问 `square.super`，因为 `square`，`square.shape` 的地址是相同的。
+要达到这种效果，我们必须将 `super` 放在结构体的第一位。
+
+### 多态
+
+在上面的例子中，我们发现了一个问题。
+`square` 类和 `shape` 类都有一个 `print` 方法，更糟糕的是当它们对 `test` 调用时，会给出不同的结果。
+在使用多态时，我们只会知道 `shape` 的 `print` 方法，所以在子类中定义的方法完全无法使用。
+要实现多态，我们必须将对象的方法当做它的属性传递下去，这样当我们不知道类型时，依旧可以找到对应的函数。
+
+此时此刻，你一定想到了我们可以使用函数指针。
+
+我们在 `shape` 定义的前面加上一个函数指针字段，指向 `print` 方法。
+
+```c
+// shape.h
+
+struct shape {
+    void (*print)(shape* self);
+    int x;
+    int y;
+};
+```
+
+在初始化时，同时初始化这个函数指针，使其指向它的 `print` 方法。
+
+我们还可以定义一个 `adprint` 方法用来访问对象的 `print` 方法并执行：
+
+```c
+void shape_adprint(shape* self) {
+    self->print(self);
+}
+```
+
+使用时：
+```c
+square* test = square_new();  // 建立 square 对象
+square_init(test, 5, 5, 10);  // 初始化对象
+shape_print((shape*)test);    // 打印出 shape(x=5, y=5)
+square_print(test);           // 打印出 square(x=5, y=5, length=10)
+shape_adprint((shape*)test);  // 打印出 square(x=5, y=5, length=10)
+
+shape* test2 = shape_new();       // 建立 shape 对象
+shape_init((shape*)test2, 5, 5);  // 初始化对象
+shape_print((shape*)test2);       // 打印出 shape(x=5, y=5)
+shape_adprint((shape*)test2);     // 打印出 shape(x=5, y=5)
+```

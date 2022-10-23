@@ -7,10 +7,9 @@ square* square_new(void) {
     return self;
 }
 
-square* square_init(int x, int y, int length) {
-    square* self = square_new();
-    self->super.x = x;
-    self->super.y = y;
+square* square_init(square* self, int x, int y, int length) {
+    shape_init(&self->super, x, y);
+    self->super.print = (void (*)(shape*)) & square_print;
     self->length = length;
     return self;
 }
