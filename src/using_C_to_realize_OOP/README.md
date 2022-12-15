@@ -96,7 +96,7 @@ square_delete(test);
 
 如果你对 C 语言有一些研究，你应该知道上面的结构体 `square` 在内存中，是按照下图绿色部分存储的。
 
-<img title="" src="./statics/pic01.svg" alt="内存示意图" width="689" data-align="center">
+![内存示意图](./static/pic01.svg)
 
 当我们把 `square *` 当作 `shape *` 访问其中的字段时，就相当于访问 `square.super`，因为从图中可看出 `square`，`square.shape` 的地址是相同的。要达到这种效果，我们必须将 `super` 放在结构体的第一位。
 
@@ -142,3 +142,7 @@ shape_init((shape*)test2, 5, 5);  // 初始化对象
 shape_print((shape*)test2);       // 打印出 shape(x=5, y=5)
 shape_adprint((shape*)test2);     // 打印出 shape(x=5, y=5)
 ```
+
+## 小结
+
+C 作为一种灵活的语言，可以通过 `struct` 来模拟面向对象。事实上在 C 标准库中，就用到了这样的方法。例如 `FILE` 结构体和 `fxxx` 函数，就用到了面向对象的思想。
